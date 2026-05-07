@@ -1,0 +1,8 @@
+-- Datos iniciales para la tienda
+INSERT IGNORE INTO shop_items (id, name, description, price, image_url, stock, category, created_at) VALUES 
+(1, 'Fundas Premium Nami', 'Fundas protectoras oficiales con arte de Nami. Paquete de 70 fundas holográficas para One Piece TCG.', 14.99, 'https://cdn.shopify.com/s/files/1/0268/5671/8408/products/125206_1.jpg', 50, 'SLEEVES', NOW()),
+(2, 'Tapete Zoro Asura', 'Tapete de juego de neopreno de alta calidad con superficie antideslizante para proteger tus cartas.', 24.99, 'https://i.ebayimg.com/images/g/x6oAAOSwgS9kaT91/s-l1600.jpg', 30, 'PLAYMAT', NOW()),
+(3, 'Deckbox Magnética Thousand Sunny', 'Caja para mazos premium con cierre magnético seguro y diseño del barco de los Sombrero de Paja.', 19.50, 'https://cdn.shopify.com/s/files/1/0612/2314/1586/files/one-piece-deck-box-thousand-sunny.jpg', 25, 'DECK_BOX', NOW()),
+(4, 'Fundas Mate Kaido', 'Fundas mate texturizadas. Evitan el deslizamiento excesivo y los molestos reflejos durante el juego.', 12.00, 'https://m.media-amazon.com/images/I/71u9sX+M5vL._AC_SY879_.jpg', 100, 'SLEEVES', NOW()),
+(5, 'Tapete Oficial Torneo', 'Tapete con las zonas de juego marcadas para facilitar las partidas y mantener el orden del tablero.', 22.90, 'https://cdn.shopify.com/s/files/1/0571/9719/9546/products/one_piece_card_game_playmat_and_card_case_set_1_538x.jpg', 40, 'PLAYMAT', NOW()),
+(6, 'Dados de Contador DON!!', 'Set de 10 dados acrílicos premium para llevar el conteo de tu poder DON!! de forma limpia y rápida.', 9.99, 'https://m.media-amazon.com/images/I/61gR9X4BIfL._AC_SX679_.jpg', 200, 'ACCESSORY', NOW());
