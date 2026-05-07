@@ -7,47 +7,61 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender javaMailSender;
+    @Value("${RESEND_API_KEY}")
+    private String resendApiKey;
 
-    @Value("${spring.mail.username:}")
-    private String senderEmail;
+    private final String SENDER_EMAIL = "onboarding@resend.dev";
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Async
     public void sendOrderReceipt(String recipientEmail, Order order) {
+        String url = "https://api.resend.com/emails";
+
         try {
-            log.info("Iniciando envío de correo para el pedido #{}", order.getId());
+            log.info("Enviando recibo via API de Resend para el pedido #{}", order.getId());
 
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            Map<String, Object> emailRequest = new HashMap<>();
+            emailRequest.put("from", SENDER_EMAIL);
+            emailRequest.put("to", recipientEmail);
+            emailRequest.put("subject", "OPTCG Deck Builder - Pedido #" + order.getId());
+            emailRequest.put("html", buildHtmlReceipt(order));
 
-            helper.setFrom(senderEmail);
-            helper.setTo(recipientEmail);
-            helper.setSubject("OPTCG Deck Builder - Recibo de tu pedido #" + order.getId());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(resendApiKey);
 
-            String htmlContent = buildHtmlReceipt(order);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(emailRequest, headers);
 
-            if (htmlContent == null || htmlContent.isEmpty()) {
-                log.error("El contenido HTML generado está vacío");
-                return;
+            // 3. Enviamos la petición POST
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("¡Correo enviado con éxito via API!");
+            } else {
+                log.error("Resend respondió con error: {}", response.getBody());
             }
 
-            message.setContent(htmlContent, "text/html; charset=utf-8");
-
-            javaMailSender.send(message);
-            log.info("¡Correo enviado con éxito a {}!", recipientEmail);
-
         } catch (Exception e) {
-            log.error("Error crítico al enviar el correo: {}", e.getMessage(), e);
+            log.error("Error al conectar con la API de Resend: {}", e.getMessage());
         }
     }
 
