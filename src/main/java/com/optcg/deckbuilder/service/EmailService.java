@@ -2,51 +2,59 @@ package com.optcg.deckbuilder.service;
 
 import com.optcg.deckbuilder.model.entity.Order;
 import com.optcg.deckbuilder.model.entity.OrderItem;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.scheduling.annotation.Async;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender javaMailSender;
+    private final WebClient webClient;
 
-    @Value("${spring.mail.username:}")
+    @Value("${resend.api.key:}")
+    private String resendApiKey;
+
+    @Value("${resend.sender:onboarding@resend.dev}")
     private String senderEmail;
 
-    public void sendOrderReceipt(String recipientEmail, Order order) {
-        if (senderEmail == null || senderEmail.isBlank()) {
-            log.warn("SMTP Username not configured. Skipping email receipt for order ID {}", order.getId());
+    @Async
+    public void sendOrderReceipt(String recipientEmail, String username, Order order) {
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.warn("Resend API Key not configured. Skipping email receipt for order ID {}", order.getId());
             return;
         }
 
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        String htmlContent = buildHtmlReceipt(username, order);
 
-            helper.setFrom(senderEmail);
-            helper.setTo(recipientEmail);
-            helper.setSubject("OPTCG Deck Builder - Recibo de tu pedido #" + order.getId());
+        Map<String, Object> body = Map.of(
+            "from", senderEmail,
+            "to", List.of(recipientEmail),
+            "subject", "OPTCG Deck Builder - Recibo de tu pedido #" + order.getId(),
+            "html", htmlContent
+        );
 
-            String htmlContent = buildHtmlReceipt(order);
-            helper.setText(htmlContent, true);
-
-            javaMailSender.send(message);
-            log.info("Order receipt email sent successfully to {}", recipientEmail);
-
-        } catch (MessagingException e) {
-            log.error("Failed to send order receipt email to {}", recipientEmail, e);
-        }
+        webClient.post()
+            .uri("https://api.resend.com/emails")
+            .header("Authorization", "Bearer " + resendApiKey)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(body)
+            .retrieve()
+            .bodyToMono(String.class)
+            .doOnSuccess(response -> log.info("Order receipt email sent successfully via Resend API to {}", recipientEmail))
+            .doOnError(error -> log.error("Failed to send order receipt email via Resend API to {}: {}", recipientEmail, error.getMessage()))
+            .subscribe();
     }
 
-    private String buildHtmlReceipt(Order order) {
+    private String buildHtmlReceipt(String username, Order order) {
         StringBuilder itemsHtml = new StringBuilder();
         for (OrderItem item : order.getItems()) {
             itemsHtml.append(String.format(
@@ -108,10 +116,11 @@ public class EmailService {
             "  </div>" +
             "</body>" +
             "</html>",
-            order.getUser().getUsername(),
+            username,
             order.getId(),
             itemsHtml.toString(),
             order.getTotal().doubleValue()
         );
     }
 }
+

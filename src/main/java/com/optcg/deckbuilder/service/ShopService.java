@@ -91,8 +91,8 @@ public class ShopService {
         order.setTotal(total);
         Order savedOrder = orderRepository.save(order);
 
-        // Send email receipt async
-        new Thread(() -> emailService.sendOrderReceipt(user.getEmail(), savedOrder)).start();
+        // Send email receipt async (using @Async in EmailService)
+        emailService.sendOrderReceipt(user.getEmail(), user.getUsername(), savedOrder);
 
         return mapToResponse(savedOrder);
     }
