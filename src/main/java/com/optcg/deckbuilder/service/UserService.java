@@ -75,7 +75,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         try {
-            String avatarUrl = cloudinaryService.uploadFile(file, "avatars");
+            String avatarUrl = cloudinaryService.uploadFileWithHash(file, "avatars");
             user.setAvatarUrl(avatarUrl);
             User updatedUser = userRepository.save(user);
             return mapToDto(updatedUser);
