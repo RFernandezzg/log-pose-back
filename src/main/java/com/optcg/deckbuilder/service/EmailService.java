@@ -2,6 +2,8 @@ package com.optcg.deckbuilder.service;
 
 import com.optcg.deckbuilder.model.entity.Order;
 import com.optcg.deckbuilder.model.entity.OrderItem;
+import com.optcg.deckbuilder.model.entity.Event;
+import com.optcg.deckbuilder.model.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +46,48 @@ public class EmailService {
             "html", htmlContent
         );
 
+        sendEmail(body, recipientEmail, "order receipt");
+    }
+
+    @Async
+    public void sendEventRegistrationNotification(User creator, User attendee, Event event) {
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.warn("Resend API Key not configured. Skipping event registration email.");
+            return;
+        }
+
+        String htmlContent = buildHtmlEventRegistration(creator.getUsername(), attendee.getUsername(), event);
+
+        Map<String, Object> body = Map.of(
+            "from", senderEmail,
+            "to", List.of(creator.getEmail()),
+            "subject", "Nuevo asistente para tu evento: " + event.getName(),
+            "html", htmlContent
+        );
+
+        sendEmail(body, creator.getEmail(), "event registration");
+    }
+
+    @Async
+    public void sendEventUnregistrationNotification(User creator, User attendee, Event event) {
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.warn("Resend API Key not configured. Skipping event unregistration email.");
+            return;
+        }
+
+        String htmlContent = buildHtmlEventUnregistration(creator.getUsername(), attendee.getUsername(), event);
+
+        Map<String, Object> body = Map.of(
+            "from", senderEmail,
+            "to", List.of(creator.getEmail()),
+            "subject", "Un usuario se ha dado de baja de tu evento: " + event.getName(),
+            "html", htmlContent
+        );
+
+        sendEmail(body, creator.getEmail(), "event unregistration");
+    }
+
+    private void sendEmail(Map<String, Object> body, String recipientEmail, String type) {
         webClient.post()
             .uri("https://api.resend.com/emails")
             .header("Authorization", "Bearer " + resendApiKey)
@@ -51,8 +95,8 @@ public class EmailService {
             .bodyValue(body)
             .retrieve()
             .bodyToMono(String.class)
-            .doOnSuccess(response -> log.info("Order receipt email sent successfully via Resend API to {}", recipientEmail))
-            .doOnError(error -> log.error("Failed to send order receipt email via Resend API to {}: {}", recipientEmail, error.getMessage()))
+            .doOnSuccess(response -> log.info("{} email sent successfully via Resend API to {}", type, recipientEmail))
+            .doOnError(error -> log.error("Failed to send {} email via Resend API to {}: {}", type, recipientEmail, error.getMessage()))
             .subscribe();
     }
 
@@ -124,5 +168,90 @@ public class EmailService {
             order.getTotal().doubleValue()
         );
     }
-}
 
+    private String buildHtmlEventRegistration(String creatorName, String attendeeName, Event event) {
+        return String.format(
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "  <style>" +
+            "    body { font-family: 'Inter', sans-serif; background-color: #0b0d2a; color: #f8fafc; margin: 0; padding: 20px; }" +
+            "    .container { max-width: 600px; margin: 0 auto; background-color: #1d2269; border-radius: 16px; padding: 30px; border: 1px solid rgba(133, 119, 82, 0.3); }" +
+            "    h1 { color: #857752; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }" +
+            "    p { color: #94a3b8; font-size: 14px; line-height: 1.6; }" +
+            "    .highlight { color: #f8fafc; font-weight: bold; }" +
+            "    .event-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #857752; }" +
+            "    .footer { margin-top: 30px; font-size: 12px; color: #64748b; text-align: center; }" +
+            "  </style>" +
+            "</head>" +
+            "<body>" +
+            "  <div class=\"container\">" +
+            "    <h1>Nuevo Asistente</h1>" +
+            "    <p>Hola <span class=\"highlight\">%s</span>,</p>" +
+            "    <p>¡Buenas noticias! <span class=\"highlight\">%s</span> se ha registrado en tu evento.</p>" +
+            "    " +
+            "    <div class=\"event-info\">" +
+            "      <strong>Evento:</strong> %s<br>" +
+            "      <strong>Fecha:</strong> %s<br>" +
+            "      <strong>Ubicación:</strong> %s" +
+            "    </div>" +
+            "    " +
+            "    <p>Puedes ver la lista completa de asistentes en la aplicación.</p>" +
+            "    " +
+            "    <div class=\"footer\">" +
+            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "    </div>" +
+            "  </div>" +
+            "</body>" +
+            "</html>",
+            creatorName,
+            attendeeName,
+            event.getName(),
+            event.getDateTime().toString(),
+            event.getLocation()
+        );
+    }
+
+    private String buildHtmlEventUnregistration(String creatorName, String attendeeName, Event event) {
+        return String.format(
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "  <style>" +
+            "    body { font-family: 'Inter', sans-serif; background-color: #0b0d2a; color: #f8fafc; margin: 0; padding: 20px; }" +
+            "    .container { max-width: 600px; margin: 0 auto; background-color: #1d2269; border-radius: 16px; padding: 30px; border: 1px solid rgba(133, 119, 82, 0.3); }" +
+            "    h1 { color: #ef4444; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }" +
+            "    p { color: #94a3b8; font-size: 14px; line-height: 1.6; }" +
+            "    .highlight { color: #f8fafc; font-weight: bold; }" +
+            "    .event-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444; }" +
+            "    .footer { margin-top: 30px; font-size: 12px; color: #64748b; text-align: center; }" +
+            "  </style>" +
+            "</head>" +
+            "<body>" +
+            "  <div class=\"container\">" +
+            "    <h1>Baja en Evento</h1>" +
+            "    <p>Hola <span class=\"highlight\">%s</span>,</p>" +
+            "    <p><span class=\"highlight\">%s</span> se ha dado de baja de tu evento con poca antelación.</p>" +
+            "    " +
+            "    <div class=\"event-info\">" +
+            "      <strong>Evento:</strong> %s<br>" +
+            "      <strong>Fecha:</strong> %s<br>" +
+            "      <strong>Ubicación:</strong> %s" +
+            "    </div>" +
+            "    " +
+            "    <p>Te notificamos esto porque falta menos de 24 horas para el inicio del evento.</p>" +
+            "    " +
+            "    <div class=\"footer\">" +
+            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "    </div>" +
+            "  </div>" +
+            "</body>" +
+            "</html>",
+            creatorName,
+            attendeeName,
+            event.getName(),
+            event.getDateTime().toString(),
+            event.getLocation()
+        );
+    }
+}
