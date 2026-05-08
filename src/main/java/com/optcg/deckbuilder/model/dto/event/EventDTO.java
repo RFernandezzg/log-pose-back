@@ -20,6 +20,8 @@ public class EventDTO {
     private LocalDateTime dateTime;
     private String location;
     private Integer maxAttendees;
+    private Double latitude;
+    private Double longitude;
     private CreatorDTO creator;
     private Set<AttendeeDTO> attendees;
     private Integer attendeeCount;

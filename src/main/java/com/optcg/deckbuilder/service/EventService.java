@@ -45,6 +45,8 @@ public class EventService {
                 .dateTime(eventDTO.getDateTime())
                 .location(eventDTO.getLocation())
                 .maxAttendees(eventDTO.getMaxAttendees())
+                .latitude(eventDTO.getLatitude())
+                .longitude(eventDTO.getLongitude())
                 .creator(creator)
                 .build();
 
@@ -105,6 +107,8 @@ public class EventService {
                 .dateTime(event.getDateTime())
                 .location(event.getLocation())
                 .maxAttendees(event.getMaxAttendees())
+                .latitude(event.getLatitude())
+                .longitude(event.getLongitude())
                 .creator(event.getCreator() != null ? EventDTO.CreatorDTO.builder()
                         .id(event.getCreator().getId())
                         .username(event.getCreator().getUsername())

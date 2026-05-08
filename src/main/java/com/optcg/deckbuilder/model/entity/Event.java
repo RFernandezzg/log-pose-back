@@ -34,6 +34,9 @@ public class Event {
     @Column(nullable = false)
     private Integer maxAttendees;
 
+    private Double latitude;
+    private Double longitude;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
