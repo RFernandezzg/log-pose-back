@@ -5,10 +5,11 @@ import com.optcg.deckbuilder.model.entity.OrderItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,8 @@ import java.util.Map;
 @Slf4j
 public class EmailService {
 
-    private final WebClient webClient;
+    @Autowired
+    private WebClient webClient;
 
     @Value("${resend.api.key:}")
     private String resendApiKey;

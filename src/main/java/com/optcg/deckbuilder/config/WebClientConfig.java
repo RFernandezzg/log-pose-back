@@ -14,6 +14,7 @@ import java.time.Duration;
 public class WebClientConfig {
 
     @Bean
+    @org.springframework.context.annotation.Primary
     public WebClient webClient() {
         final int size = 16 * 1024 * 1024;
         final ExchangeStrategies strategies = ExchangeStrategies.builder()
