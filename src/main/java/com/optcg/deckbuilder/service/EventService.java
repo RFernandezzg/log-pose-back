@@ -44,6 +44,7 @@ public class EventService {
                 .description(eventDTO.getDescription())
                 .dateTime(eventDTO.getDateTime())
                 .location(eventDTO.getLocation())
+                .maxAttendees(eventDTO.getMaxAttendees())
                 .creator(creator)
                 .build();
 
@@ -59,6 +60,10 @@ public class EventService {
 
         if (event.getAttendees().contains(user)) {
             throw new RuntimeException("User already registered for this event");
+        }
+
+        if (event.getMaxAttendees() != null && event.getAttendees().size() >= event.getMaxAttendees()) {
+            throw new RuntimeException("Event is full");
         }
 
         event.getAttendees().add(user);
@@ -99,6 +104,7 @@ public class EventService {
                 .description(event.getDescription())
                 .dateTime(event.getDateTime())
                 .location(event.getLocation())
+                .maxAttendees(event.getMaxAttendees())
                 .creator(event.getCreator() != null ? EventDTO.CreatorDTO.builder()
                         .id(event.getCreator().getId())
                         .username(event.getCreator().getUsername())

@@ -31,6 +31,9 @@ public class Event {
     @Column(nullable = false)
     private String location;
 
+    @Column(nullable = false)
+    private Integer maxAttendees;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;

@@ -19,6 +19,7 @@ public class EventDTO {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm[:ss]")
     private LocalDateTime dateTime;
     private String location;
+    private Integer maxAttendees;
     private CreatorDTO creator;
     private Set<AttendeeDTO> attendees;
     private Integer attendeeCount;
