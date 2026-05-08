@@ -76,6 +76,11 @@ public class UserService {
 
         try {
             String avatarUrl = cloudinaryService.uploadFileWithHash(file, "avatars");
+            
+            if (avatarUrl.equals(user.getAvatarUrl())) {
+                throw new ConflictException("Ese es tu avatar actual");
+            }
+            
             user.setAvatarUrl(avatarUrl);
             User updatedUser = userRepository.save(user);
             return mapToDto(updatedUser);
