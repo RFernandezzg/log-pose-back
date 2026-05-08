@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,19 +99,19 @@ public class EventService {
                 .description(event.getDescription())
                 .dateTime(event.getDateTime())
                 .location(event.getLocation())
-                .creator(EventDTO.CreatorDTO.builder()
+                .creator(event.getCreator() != null ? EventDTO.CreatorDTO.builder()
                         .id(event.getCreator().getId())
                         .username(event.getCreator().getUsername())
                         .avatarUrl(event.getCreator().getAvatarUrl())
-                        .build())
-                .attendees(event.getAttendees().stream()
+                        .build() : null)
+                .attendees(event.getAttendees() != null ? event.getAttendees().stream()
                         .map(user -> EventDTO.AttendeeDTO.builder()
                                 .id(user.getId())
                                 .username(user.getUsername())
                                 .avatarUrl(user.getAvatarUrl())
                                 .build())
-                        .collect(Collectors.toSet()))
-                .attendeeCount(event.getAttendees().size())
+                        .collect(Collectors.toSet()) : new HashSet<>())
+                .attendeeCount(event.getAttendees() != null ? event.getAttendees().size() : 0)
                 .build();
     }
 }
