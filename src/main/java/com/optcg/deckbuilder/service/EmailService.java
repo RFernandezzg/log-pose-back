@@ -87,6 +87,25 @@ public class EmailService {
         sendEmail(body, creator.getEmail(), "event unregistration");
     }
 
+    @Async
+    public void sendEventCancellationNotification(User attendee, Event event) {
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.warn("Resend API Key not configured. Skipping event cancellation email.");
+            return;
+        }
+
+        String htmlContent = buildHtmlEventCancellation(attendee.getUsername(), event);
+
+        Map<String, Object> body = Map.of(
+            "from", senderEmail,
+            "to", List.of(attendee.getEmail()),
+            "subject", "Evento Cancelado: " + event.getName(),
+            "html", htmlContent
+        );
+
+        sendEmail(body, attendee.getEmail(), "event cancellation");
+    }
+
     private void sendEmail(Map<String, Object> body, String recipientEmail, String type) {
         webClient.post()
             .uri("https://api.resend.com/emails")
@@ -248,6 +267,48 @@ public class EmailService {
             "</body>" +
             "</html>",
             creatorName,
+            attendeeName,
+            event.getName(),
+            event.getDateTime().toString(),
+            event.getLocation()
+        );
+    }
+
+    private String buildHtmlEventCancellation(String attendeeName, Event event) {
+        return String.format(
+            "<!DOCTYPE html>" +
+            "<html>" +
+            "<head>" +
+            "  <style>" +
+            "    body { font-family: 'Inter', sans-serif; background-color: #0b0d2a; color: #f8fafc; margin: 0; padding: 20px; }" +
+            "    .container { max-width: 600px; margin: 0 auto; background-color: #1d2269; border-radius: 16px; padding: 30px; border: 1px solid rgba(133, 119, 82, 0.3); }" +
+            "    h1 { color: #ef4444; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }" +
+            "    p { color: #94a3b8; font-size: 14px; line-height: 1.6; }" +
+            "    .highlight { color: #f8fafc; font-weight: bold; }" +
+            "    .event-info { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444; }" +
+            "    .footer { margin-top: 30px; font-size: 12px; color: #64748b; text-align: center; }" +
+            "  </style>" +
+            "</head>" +
+            "<body>" +
+            "  <div class=\"container\">" +
+            "    <h1>Evento Cancelado</h1>" +
+            "    <p>Hola <span class=\"highlight\">%s</span>,</p>" +
+            "    <p>Lamentamos informarte que el siguiente evento ha sido cancelado por el organizador:</p>" +
+            "    " +
+            "    <div class=\"event-info\">" +
+            "      <strong>Evento:</strong> %s<br>" +
+            "      <strong>Fecha:</strong> %s<br>" +
+            "      <strong>Ubicación:</strong> %s" +
+            "    </div>" +
+            "    " +
+            "    <p>Sentimos las molestias que esto pueda ocasionarte.</p>" +
+            "    " +
+            "    <div class=\"footer\">" +
+            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "    </div>" +
+            "  </div>" +
+            "</body>" +
+            "</html>",
             attendeeName,
             event.getName(),
             event.getDateTime().toString(),

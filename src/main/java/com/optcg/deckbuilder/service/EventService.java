@@ -5,6 +5,7 @@ import com.optcg.deckbuilder.model.entity.Event;
 import com.optcg.deckbuilder.model.entity.User;
 import com.optcg.deckbuilder.repository.EventRepository;
 import com.optcg.deckbuilder.repository.UserRepository;
+import com.optcg.deckbuilder.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +98,23 @@ public class EventService {
         }
 
         return convertToDTO(savedEvent);
+    }
+
+    @Transactional
+    public void deleteEvent(Long id, String username) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        if (!event.getCreator().getUsername().equals(username)) {
+            throw new RuntimeException("Only the creator can delete the event");
+        }
+
+        // Notify attendees before deleting
+        for (User attendee : event.getAttendees()) {
+            emailService.sendEventCancellationNotification(attendee, event);
+        }
+
+        eventRepository.delete(event);
     }
 
     private EventDTO convertToDTO(Event event) {

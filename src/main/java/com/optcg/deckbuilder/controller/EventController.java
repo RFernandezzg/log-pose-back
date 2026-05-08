@@ -44,4 +44,11 @@ public class EventController {
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(eventService.unregisterAttendee(id, userDetails.getUsername()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        eventService.deleteEvent(id, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
+    }
 }
