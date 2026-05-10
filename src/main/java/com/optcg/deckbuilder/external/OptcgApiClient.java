@@ -64,7 +64,7 @@ public class OptcgApiClient {
     }
 
     public List<Map<String, String>> getSets() {
-        String uri = baseUrl + "/api/sets";
+        String uri = baseUrl + "/api/allSets/";
         log.debug("Fetching sets from: {}", uri);
         return fetchList(uri, new ParameterizedTypeReference<List<Map<String, String>>>() {
         });
@@ -120,61 +120,9 @@ public class OptcgApiClient {
             if (raw == null)
                 return List.of();
 
-            return raw.stream().map(m -> {
-                ExternalCardDto c = new ExternalCardDto();
-                // map known fields safely
-                Object cardImageIdObj = m.get("card_image_id");
-                Object cardSetIdObj = m.get("card_set_id");
-
-                c.setId(cardImageIdObj != null ? cardImageIdObj.toString()
-                        : (cardSetIdObj != null ? cardSetIdObj.toString() : null));
-                c.setCardImageId(cardImageIdObj != null ? cardImageIdObj.toString() : null);
-                c.setCardSetId(cardSetIdObj != null ? cardSetIdObj.toString() : null);
-
-                Object cardName = m.get("card_name");
-                c.setName(cardName != null ? cardName.toString() : null);
-
-                Object cardType = m.get("card_type");
-                c.setType(cardType != null ? cardType.toString() : null);
-
-                Object attribute = m.get("attribute");
-                c.setAttribute(attribute != null ? attribute.toString() : null);
-
-                Object cardPower = m.get("card_power");
-                c.setPower(cardPower != null ? cardPower.toString() : null);
-
-                Object counter = m.get("counter_amount");
-                c.setCounter(counter != null ? counter.toString() : null);
-
-                Object cardColor = m.get("card_color");
-                c.setColor(cardColor != null ? cardColor.toString() : null);
-
-                Object cardText = m.get("card_text");
-                c.setText(cardText != null ? cardText.toString() : null);
-
-                Object cardCost = m.get("card_cost");
-                c.setCost(cardCost != null ? cardCost.toString() : null);
-
-                Object life = m.get("life");
-                c.setLife(life != null ? life.toString() : null);
-
-                Object cardImage = m.get("card_image");
-                c.setImageUrl(cardImage != null ? cardImage.toString() : null);
-
-                Object setName = m.get("set_name");
-                c.setSetName(setName != null ? setName.toString() : null);
-
-                Object setId = m.get("set_id");
-                c.setSetId(setId != null ? setId.toString() : null);
-
-                Object subTypes = m.get("sub_types");
-                c.setSubTypes(subTypes != null ? subTypes.toString() : null);
-
-                Object rarity = m.get("rarity");
-                c.setRarity(rarity != null ? rarity.toString() : null);
-
-                return c;
-            }).toList();
+            return raw.stream()
+                    .map(this::mapCard)
+                    .toList();
         } catch (Exception ex) {
             log.error("Error fetching raw cards from API at {}: {}", uri, ex.getMessage(), ex);
             // Return empty list as a graceful fallback to avoid propagating 502 to clients
