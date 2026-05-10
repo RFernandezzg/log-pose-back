@@ -44,6 +44,8 @@ public class AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER)
+                .avatarUrl(
+                        "https://res.cloudinary.com/dyilnub94/image/upload/q_auto/f_auto/v1778453973/avatars/3b3555b5f93427a46cb0efae93c51419304babe5.jpg")
                 .build();
 
         userRepository.save(user);
@@ -58,7 +60,7 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
 
@@ -69,7 +71,7 @@ public class AuthService {
                         .username(user.getUsername())
                         .build();
             }
-            
+
             if (!totpService.validateCode(user.getTotpSecret(), request.getTotpCode())) {
                 throw new BadCredentialsException("Invalid 2FA code");
             }
