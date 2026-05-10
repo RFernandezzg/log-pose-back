@@ -64,16 +64,15 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> 
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                            .requestMatchers("/api/public/**").permitAll()
-                            .requestMatchers("/api/cards/**").permitAll()
-                            .requestMatchers("/api/proxy/**").permitAll()
-                            .requestMatchers("/api/shop/items").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/decks", "/api/decks/*").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/decks/*/like").permitAll()
-                            .anyRequest().authenticated()
-                );
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/cards/**").permitAll()
+                        .requestMatchers("/api/proxy/**").permitAll()
+                        .requestMatchers("/api/shop/items").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/decks", "/api/decks/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/decks/*/like").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
+                        .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
