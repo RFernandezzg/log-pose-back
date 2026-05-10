@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.optcg</groupId>
-    <artifactId>deckbuilder</artifactId>
+    <artifactId>logpose</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>OPTCG Deck Builder</name>
-    <description>One Piece TCG Deck Builder - TFG DAW</description>
+    <name>LogPose</name>
+    <description>LogPose - One Piece TCG Deck Builder - TFG DAW</description>
 
     <properties>
         <java.version>21</java.version>

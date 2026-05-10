@@ -40,7 +40,7 @@ public class ImageProxyController {
             HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
             conn.setConnectTimeout(TIMEOUT_MS);
             conn.setReadTimeout(TIMEOUT_MS);
-            conn.setRequestProperty("User-Agent", "OPTCG-DeckBuilder/1.0");
+            conn.setRequestProperty("User-Agent", "LogPose/1.0");
 
             int status = conn.getResponseCode();
             if (status != 200) {

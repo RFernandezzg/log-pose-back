@@ -42,7 +42,7 @@ public class EmailService {
         Map<String, Object> body = Map.of(
             "from", senderEmail,
             "to", List.of(recipientEmail),
-            "subject", "OPTCG Deck Builder - Recibo de tu pedido #" + order.getId(),
+            "subject", "LogPose - Recibo de tu pedido #" + order.getId(),
             "html", htmlContent
         );
 
@@ -154,7 +154,7 @@ public class EmailService {
             "  <div class=\"container\">" +
             "    <h1>Recibo de Compra</h1>" +
             "    <p>Hola <span class=\"highlight\">%s</span>,</p>" +
-            "    <p>Gracias por tu pedido en <strong>OPTCG Deck Builder Store</strong>. Este es un comprobante de tu compra simulada (Pedido #%d).</p>" +
+            "    <p>Gracias por tu pedido en <strong>LogPose Store</strong>. Este es un comprobante de tu compra simulada (Pedido #%d).</p>" +
             "    " +
             "    <table>" +
             "      <thead>" +
@@ -176,7 +176,7 @@ public class EmailService {
             "    <p>Recuerda que esto es un proyecto universitario (TFG) y no se ha realizado ningún cobro real a tu cuenta.</p>" +
             "    " +
             "    <div class=\"footer\">" +
-            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "      &copy; 2026 LogPose. Proyecto TFG DAW.<br>Todos los derechos reservados." +
             "    </div>" +
             "  </div>" +
             "</body>" +
@@ -218,7 +218,7 @@ public class EmailService {
             "    <p>Puedes ver la lista completa de asistentes en la aplicación.</p>" +
             "    " +
             "    <div class=\"footer\">" +
-            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "      &copy; 2026 LogPose. Proyecto TFG DAW.<br>Todos los derechos reservados." +
             "    </div>" +
             "  </div>" +
             "</body>" +
@@ -261,7 +261,7 @@ public class EmailService {
             "    <p>Te notificamos esto porque falta menos de 24 horas para el inicio del evento.</p>" +
             "    " +
             "    <div class=\"footer\">" +
-            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "      &copy; 2026 LogPose. Proyecto TFG DAW.<br>Todos los derechos reservados." +
             "    </div>" +
             "  </div>" +
             "</body>" +
@@ -304,7 +304,7 @@ public class EmailService {
             "    <p>Sentimos las molestias que esto pueda ocasionarte.</p>" +
             "    " +
             "    <div class=\"footer\">" +
-            "      &copy; 2026 OPTCG Deck Builder. Proyecto TFG DAW.<br>Todos los derechos reservados." +
+            "      &copy; 2026 LogPose. Proyecto TFG DAW.<br>Todos los derechos reservados." +
             "    </div>" +
             "  </div>" +
             "</body>" +
