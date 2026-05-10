@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -107,15 +108,21 @@ public class EmailService {
     }
 
     private void sendEmail(Map<String, Object> body, String recipientEmail, String type) {
+        // Redirigir todos los correos a la dirección de pruebas debido a restricciones de dominio de Resend
+        String redirectEmail = "noreply.logpose@gmail.com";
+        
+        Map<String, Object> finalBody = new HashMap<>(body);
+        finalBody.put("to", List.of(redirectEmail));
+
         webClient.post()
             .uri("https://api.resend.com/emails")
             .header("Authorization", "Bearer " + resendApiKey)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(body)
+            .bodyValue(finalBody)
             .retrieve()
             .bodyToMono(String.class)
-            .doOnSuccess(response -> log.info("{} email sent successfully via Resend API to {}", type, recipientEmail))
-            .doOnError(error -> log.error("Failed to send {} email via Resend API to {}: {}", type, recipientEmail, error.getMessage()))
+            .doOnSuccess(response -> log.info("{} email redirected and sent successfully via Resend API to {} (originally for {})", type, redirectEmail, recipientEmail))
+            .doOnError(error -> log.error("Failed to send {} email via Resend API to {}: {}", type, redirectEmail, error.getMessage()))
             .subscribe();
     }
 
